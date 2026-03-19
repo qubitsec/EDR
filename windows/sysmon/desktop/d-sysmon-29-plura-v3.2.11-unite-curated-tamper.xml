@@ -1,4 +1,4 @@
-<!-- PLURA_CONFIG_VERSION: d-sysmon-29-plura-v3.2.10-unite-curated-tamper.xml -->
+<!-- PLURA_CONFIG_VERSION: d-sysmon-29-plura-v3.2.11-unite-curated-tamper.xml -->
 <!-- PLURA_SCHEMA_TARGET: 4.90 -->
 
 <Sysmon schemaversion="4.90">
@@ -350,7 +350,7 @@
     <!-- ============================================================ -->
     <!-- Event ID 29: FileExecutableDetected (Merged) (Desktop) -->
     <!-- ============================================================ -->
-	    <RuleGroup name="Exclude_LegitActivity_Desktop" groupRelation="or">
+	<RuleGroup name="Exclude_LegitActivity_Desktop" groupRelation="or">
       <FileExecutableDetected onmatch="exclude">
         <Rule groupRelation="and">
           <Image condition="contains">\Office\setup.exe</Image>
@@ -777,21 +777,133 @@
           <Image condition="contains">\Package_for_RollupFix</Image>
           <TargetFilename condition="end with">.dll</TargetFilename>
         </Rule>
-
-		<!-- 01/29 추가 -->
-		<!-- Office 업데이트 과정에서 구성 파일 생성 -->
+		  
 		<Rule groupRelation="and">
           <Image condition="is">C:\Program Files\Common Files\Microsoft Shared\ClickToRun\OfficeClickToRun.exe</Image>
           <TargetFilename condition="begin with">C:\Program Files\Microsoft Office\Updates\Download\PackageFiles\</TargetFilename>
           <TargetFilename condition="contains">\root\Client\</TargetFilename>
           <TargetFilename condition="contains any">\AppVDllSurrogate.exe;\AppVLP.exe;.dll</TargetFilename>
         </Rule>
-		
-		<!-- Office 통합 구성요소(integrator.exe)가 Click-to-Run 업데이트 -->
+
 		<Rule groupRelation="and">
           <Image condition="is">C:\Program Files\Microsoft Office\root\integration\integrator.exe</Image>
           <TargetFilename condition="begin with">C:\ProgramData\Microsoft\ClickToRun\</TargetFilename>
           <TargetFilename condition="end with">\integrator.exe</TargetFilename>
+        </Rule>
+
+		<!-- Windows Update 패키지 다운로드 및 처리 과정에서 SoftwareDistribution\Download 경로에 업데이트 관련 파일을 생성 -->
+		<Rule groupRelation="and">
+          <Image condition="is">C:\Windows\System32\mousocoreworker.exe</Image>
+          <TargetFilename condition="begin with">C:\Windows\SoftwareDistribution\Download\</TargetFilename>
+          <TargetFilename condition="end with">C:\Windows\SoftwareDistribution\Download\</TargetFilename>
+        </Rule>
+		
+		<!-- Windows 진단 패키지(SDIAG) 경로에 리소스 파일 생성 -->
+		<Rule groupRelation="and">
+          <Image condition="is">C:\Windows\system32\taskhostw.exe</Image>
+          <TargetFilename condition="begin with">C:\Windows\Temp\SDIAG_</TargetFilename>
+        </Rule>
+		
+		<!-- Bing Search 스토어 앱 설치/업데이트 -->
+		<Rule groupRelation="and">
+          <Image condition="is">C:\Windows\system32\svchost.exe</Image>
+          <TargetFilename condition="begin with">C:\Program Files\WindowsApps\Microsoft.BingSearch</TargetFilename>
+		  <TargetFilename condition="end with">\MicrosoftBing.exe</TargetFilename>
+        </Rule>
+		
+		<!-- OneDrive 자동 업데이트 과정에서 새로운 버전 디렉토리에 파일 생성 -->
+		<Rule groupRelation="and">
+          <Image condition="contains">\AppData\Local\Microsoft\OneDrive\</Image>
+          <Image condition="contains any">\OneDrivePatcher.exe;\OneDriveSetup.exe</Image>
+          <TargetFilename condition="contains">\AppData\Local\Microsoft\OneDrive\</TargetFilename>
+        </Rule>
+		
+		<!-- Windows 업데이트 과정에서 현재 진행 중인 패키지 임시 저장 -->
+		<Rule groupRelation="and">
+          <Image condition="end with">\TiWorker.exe</Image>
+          <TargetFilename condition="begin with">>C:\Windows\WinSxS\Temp\InFlight\</TargetFilename>
+        </Rule>
+		
+		<!-- Windows 업데이트 패키지 내부 파일을 캐시 디렉터리에 생성 -->
+		<Rule groupRelation="and">
+          <Image condition="end with">\TiWorker.exe</Image>
+          <TargetFilename condition="begin with">C:\Windows\SoftwareDistribution\Download\</TargetFilename>
+          <TargetFilename condition="contains">\inst\</TargetFilename>
+        </Rule>
+		
+		<!-- .NET 런타임 최적화 -->
+		<Rule groupRelation="and">
+          <Image condition="begin with">C:\Windows\Microsoft.NET\Framework64\</Image>
+          <Image condition="end with">\mscorsvw.exe</Image>
+          <TargetFilename condition="begin with">C:\Windows\assembly\NativeImages_</TargetFilename>
+          <TargetFilename condition="end with">.ni.dll</TargetFilename>
+        </Rule>
+		
+		<!-- Windows 업데이트에서 CBS 작업 디렉터리에서 CAB 패키지 내부 파일 추출 -->
+		<Rule groupRelation="and">
+          <Image condition="end with">\TiWorker.exe</Image>
+          <TargetFilename condition="begin with">C:\Windows\CbsTemp\</TargetFilename>
+          <TargetFilename condition="contains">.cab\</TargetFilename>
+        </Rule>
+		
+		<!-- Windows 업데이트 적용 시 재부팅 후 교체될 시스템 파일을 스테이징 -->
+		<Rule groupRelation="and">
+          <Image condition="end with">\TiWorker.exe</Image>
+          <TargetFilename condition="begin with">C:\Windows\WinSxS\Temp\PendingRenames\</TargetFilename>
+        </Rule>
+		
+		<!-- Microsoft Edge 자동 업데이트 시 새 버전 설치 파일을 Download 캐시에 저장 -->
+		<Rule groupRelation="and">
+          <Image condition="is">C:\Program Files (x86)\Microsoft\EdgeUpdate\MicrosoftEdgeUpdate.exe</Image>
+          <TargetFilename condition="begin with">C:\Program Files (x86)\Microsoft\EdgeUpdate\Download\</TargetFilename>
+        </Rule>
+		
+		<!-- Windows Update 관련 구성요소(RUXIM) 파일 생성 -->
+		<Rule groupRelation="and">
+          <Image condition="is">C:\Windows\system32\msiexec.exe</Image>
+          <TargetFilename condition="is">C:\Program Files\RUXIM\</TargetFilename>
+        </Rule>
+		
+		<!-- Microsoft Update Health Tools 설치: Windows Update 유지보수 구성요소 -->
+		<Rule groupRelation="and">
+          <Image condition="is">C:\Windows\system32\msiexec.exe</Image>
+          <TargetFilename condition="begin with">C:\Program Files\Microsoft Update Health Tools\</TargetFilename>
+        </Rule>
+		
+		<!-- Windows Update 구성요소 설치: 업데이트 복구 기능, 시스템 상태 점검 및 문제 자동 수정 -->
+		<Rule groupRelation="and">
+          <Image condition="is">C:\Windows\System32\MsiExec.exe</Image>
+          <TargetFilename condition="contains any">\sedplugins.dll;\QualityUpdateAssistant.dll</TargetFilename>
+        </Rule>
+		
+		<!-- Microsoft Store 의존성 패키지 -->
+		<Rule groupRelation="and">
+          <Image condition="is">C:\Windows\system32\svchost.exe</Image>
+          <TargetFilename condition="begin with">C:\Program Files\WindowsApps\Microsoft.VCLibs.</TargetFilename>
+        </Rule>
+		
+		<!-- Microsoft Store(WindowsApps) 패키지 경로에 메타데이터 파일 생성 -->
+		<Rule groupRelation="and">
+          <Image condition="is">C:\Windows\system32\svchost.exe</Image>
+          <TargetFilename condition="begin with">C:\Program Files\WindowsApps\Microsoft.WindowsStore_</TargetFilename>
+        </Rule>
+		
+		<!-- Microsoft Office Hub 앱 배포/업데이트 -->
+		<Rule groupRelation="and">
+          <Image condition="is">C:\WINDOWS\system32\svchost.exe</Image>
+          <TargetFilename condition="begin with">C:\Program Files\WindowsApps\Microsoft.MicrosoftOfficeHub_</TargetFilename>
+        </Rule>
+		
+		<!-- Chrome 업데이트: 임시 Unpacker 디렉토리 내 setup.exe 생성 -->
+		<Rule groupRelation="and">
+          <Image condition="end with">chrome_installer_uncompressed.exe</Image>
+          <TargetFilename condition="begin with">C:\Windows\SystemTemp\GoogleUpdater_chrome_Unpacker_</TargetFilename>
+        </Rule>
+		
+		<!-- Notion 업데이트 임시 파일 생성 -->
+		<Rule groupRelation="and">
+          <Image condition="end with">\Notion\Notion.exe</Image>
+          <TargetFilename condition="contains">\AppData\Local\notion-updater\pending\</TargetFilename>
         </Rule>
       </FileExecutableDetected>
     </RuleGroup>
